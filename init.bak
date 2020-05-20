@@ -1,0 +1,21 @@
+data "ec2_user_data_file" "client" {
+  template = file("./ec2_user_data.sh")
+}
+data "ec2_user_data" "config" {
+  gzip          = false
+  base64_encode = false
+  
+  #first part of local config file
+  part {
+    content_type = "text/x-shellscript"
+    content      = <<-EOF
+    #!/bin/bash
+    echo 'aws_region="${var.aws_region}"' > /opt/aws_region
+    EOF
+  }
+  #second part
+  part {
+    content_type = "text/x-shellscript"
+    content      = data.tec2_user_data_file.client.rendered
+  }
+}
